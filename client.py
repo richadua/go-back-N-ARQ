@@ -33,6 +33,12 @@ def main():
     client_socket.close()
 
 
+def get_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    return s.getsockname()[0]
+
+
 def carry_around_add(a, b):
     c = a + b
     return (c & 0xffff) + (c >> 16)
@@ -88,6 +94,8 @@ def send_file(client_socket, mss, file):
     global lock
     global send_timer
 
+    reply = ["client_ip", get_ip()]
+    client_socket.sendto(pickle.dumps(reply), (server_address, server_port))
     next_packet = 0
     packets = get_mss_sized_data_chunks(mss, file)
 

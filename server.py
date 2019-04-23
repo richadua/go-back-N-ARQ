@@ -37,8 +37,8 @@ def receive(s, filename):
         print('Unable to open', filename)
         return
 
+    client_ip = ""
     expected_num = 0
-    client_ip = "192.168.1.172"
     while True:
         pkt = s.recv(1024)
         if not pkt:
@@ -46,32 +46,35 @@ def receive(s, filename):
 
         data = pickle.loads(pkt)
 
-        seq_num = data[0]
-        checksum = data[1]
-        msg = data[3]
-
-        loss = random.random()
-
-        print('Got packet', seq_num)
-
-        if loss <= prob_loss:
-            print("Packet loss, sequence number = ", seq_num)
+        if data[0] == "client_ip":
+            client_ip = data[1]
         else:
-            if checksum == calc_checksum(msg):
-                if seq_num == expected_num:
-                    print('Sending ACK', expected_num)
-                    reply = [expected_num, "0000000000000000", "1010101010101010"]
-                    s.sendto(pickle.dumps(reply), (client_ip, 65532))
-                    expected_num += 1
-                    with open(filename, 'ab') as file:
-                        file.write(msg)
-                else:
-                    print('Sending ACK', expected_num - 1)
-                    reply = [expected_num - 1, "0000000000000000", "1010101010101010"]
-                    s.sendto(pickle.dumps(reply), (client_ip, 65532))
+            seq_num = data[0]
+            checksum = data[1]
+            msg = data[3]
+
+            loss = random.random()
+
+            print('Got packet', seq_num)
+
+            if loss <= prob_loss:
+                print("Packet loss, sequence number = ", seq_num)
             else:
-                print("Incorrect checksum, packet dropped")
-        file.close()
+                if checksum == calc_checksum(msg):
+                    if seq_num == expected_num:
+                        print('Sending ACK', expected_num)
+                        reply = [expected_num, "0000000000000000", "1010101010101010"]
+                        s.sendto(pickle.dumps(reply), (client_ip, 65532))
+                        expected_num += 1
+                        with open(filename, 'ab') as file:
+                            file.write(msg)
+                    else:
+                        print('Sending ACK', expected_num - 1)
+                        reply = [expected_num - 1, "0000000000000000", "1010101010101010"]
+                        s.sendto(pickle.dumps(reply), (client_ip, 65532))
+                else:
+                    print("Incorrect checksum, packet dropped")
+            file.close()
 
 
 if __name__ == '__main__':
