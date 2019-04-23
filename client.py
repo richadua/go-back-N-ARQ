@@ -12,7 +12,7 @@ SLEEP_INTERVAL = 0.05
 ACK = 0
 lock = threading.RLock()
 server_port = 7735
-server_address = "localhost"
+server_address = '192.168.1.172'
 base = 0
 send_timer = TIMEOUT_INTERVAL
 
@@ -21,10 +21,12 @@ def main():
     global N
     global base
     global MSS
-    own_address, own_port, file_name, N, MSS = cmd_args()
+    global server_address
+    global server_port
+    server_address, server_port, file_name, N, MSS = cmd_args()
 
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    client_socket.bind(('localhost', 65532))
+    client_socket.bind(('192.168.1.197', 65532))
 
     send_file(client_socket, MSS, file_name)
 

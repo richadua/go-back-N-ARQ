@@ -38,7 +38,7 @@ def receive(s, filename):
         return
 
     expected_num = 0
-
+    client_ip = "192.168.1.172"
     while True:
         pkt = s.recv(1024)
         if not pkt:
@@ -61,14 +61,14 @@ def receive(s, filename):
                 if seq_num == expected_num:
                     print('Sending ACK', expected_num)
                     reply = [expected_num, "0000000000000000", "1010101010101010"]
-                    s.sendto(pickle.dumps(reply), ('localhost', 65532))
+                    s.sendto(pickle.dumps(reply), (client_ip, 65532))
                     expected_num += 1
                     with open(filename, 'ab') as file:
                         file.write(msg)
                 else:
                     print('Sending ACK', expected_num - 1)
                     reply = [expected_num - 1, "0000000000000000", "1010101010101010"]
-                    s.sendto(pickle.dumps(reply), ('localhost', 65532))
+                    s.sendto(pickle.dumps(reply), (client_ip, 65532))
             else:
                 print("Incorrect checksum, packet dropped")
         file.close()
