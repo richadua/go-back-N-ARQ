@@ -28,6 +28,9 @@ def main():
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     client_socket.bind(('192.168.1.197', 65532))
 
+    reply = ["client_ip", get_ip()]
+    client_socket.sendto(pickle.dumps(reply), (server_address, server_port))
+
     send_file(client_socket, MSS, file_name)
 
     client_socket.close()
@@ -94,8 +97,6 @@ def send_file(client_socket, mss, file):
     global lock
     global send_timer
 
-    reply = ["client_ip", get_ip()]
-    client_socket.sendto(pickle.dumps(reply), (server_address, server_port))
     next_packet = 0
     packets = get_mss_sized_data_chunks(mss, file)
 
