@@ -1,11 +1,16 @@
 import socket
 import sys
 import pickle
-import random
+from random import *
 
-RECEIVER_ADDR = ('localhost', 7735)
+
+def get_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    return s.getsockname()[0]
+
+RECEIVER_ADDR = (get_ip(), 7735)
 prob_loss = 0.0
-
 
 def cmd_args():
     server_port = sys.argv[1]
@@ -37,29 +42,26 @@ def receive(s, filename):
         print('Unable to open', filename)
         return
 
-    client_ip = ""
     expected_num = 0
+    client_ip = ""
     while True:
         pkt = s.recv(1024)
         if not pkt:
             break
 
         data = pickle.loads(pkt)
-
-        if data[0] == "client_ip":
+        if(data[0] == "client_ip"):
             client_ip = data[1]
         else:
             seq_num = data[0]
             checksum = data[1]
             msg = data[3]
 
-            loss = random.random()
-
-            print('Got packet', seq_num)
-
+            loss = uniform(0,1)
             if loss <= prob_loss:
                 print("Packet loss, sequence number = ", seq_num)
             else:
+                print('Got packet', seq_num)
                 if checksum == calc_checksum(msg):
                     if seq_num == expected_num:
                         print('Sending ACK', expected_num)
@@ -78,9 +80,9 @@ def receive(s, filename):
 
 
 if __name__ == '__main__':
-    port, output_file, prob = cmd_args()
+    
+    port, output_file, prob_loss = cmd_args()
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
     sock.bind(RECEIVER_ADDR)
     receive(sock, output_file)
     sock.close()
