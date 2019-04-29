@@ -26,7 +26,7 @@ def main():
     server_address, server_port, file_name, N, MSS = cmd_args()
 
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    client_socket.bind(('192.168.1.197', 65532))
+    client_socket.bind((get_ip(), 65532))
 
     reply = ["client_ip", get_ip()]
     client_socket.sendto(pickle.dumps(reply), (server_address, server_port))

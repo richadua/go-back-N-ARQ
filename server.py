@@ -9,8 +9,10 @@ def get_ip():
     s.connect(("8.8.8.8", 80))
     return s.getsockname()[0]
 
+
 RECEIVER_ADDR = (get_ip(), 7735)
 prob_loss = 0.0
+
 
 def cmd_args():
     server_port = sys.argv[1]
@@ -50,7 +52,7 @@ def receive(s, filename):
             break
 
         data = pickle.loads(pkt)
-        if(data[0] == "client_ip"):
+        if data[0] == "client_ip":
             client_ip = data[1]
         else:
             seq_num = data[0]
@@ -80,7 +82,7 @@ def receive(s, filename):
 
 
 if __name__ == '__main__':
-    
+
     port, output_file, prob_loss = cmd_args()
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(RECEIVER_ADDR)
